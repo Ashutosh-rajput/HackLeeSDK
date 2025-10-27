@@ -1,21 +1,139 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Screenshot Captioner</title>
-    <style>
-        body { font-family: sans-serif; background-color: #f0f0f0; color: #333; }
-        #container { padding: 20px; }
-        #screenshot { max-width: 100%; border: 1px solid #ccc; }
-        #caption { margin-top: 10px; font-size: 1.2em; }
-    </style>
+  <meta charset="UTF-8" />
+  <title>DSA Screenshot Captioner</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      background: linear-gradient(135deg, #141e30, #243b55);
+      color: #f1f1f1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    #app {
+      width: 80%;
+      max-width: 900px;
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 16px;
+      padding: 30px;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    h1 {
+      text-align: center;
+      color: #fff;
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    .shortcuts {
+      background-color: rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 25px;
+    }
+
+    .shortcuts p {
+      margin: 6px 0;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .shortcuts span {
+      color: #8bc34a;
+      font-weight: bold;
+      font-family: monospace;
+    }
+
+    #preview-area {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .screenshot-thumb {
+      width: 180px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      transition: transform 0.2s ease, border-color 0.3s ease;
+    }
+
+    .screenshot-thumb:hover {
+      transform: scale(1.05);
+      border-color: #8bc34a;
+    }
+
+    #caption-box {
+      text-align: center;
+      font-size: 1.1rem;
+      background-color: rgba(0, 0, 0, 0.3);
+      padding: 15px;
+      border-radius: 10px;
+      line-height: 1.6;
+      min-height: 60px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    footer {
+      text-align: center;
+      font-size: 0.9rem;
+      margin-top: 15px;
+      color: #aaa;
+    }
+  </style>
 </head>
 <body>
-    <div id="container">
-        <h1>Press Shift+Q+R to take a screenshot and get a caption</h1>
-        <img id="screenshot" src="" alt="Screenshot will appear here">
-        <p id="caption"></p>
+  <div id="app">
+    <h1>🧠 DSA Screenshot Captioner</h1>
+
+    <div class="shortcuts">
+      <p><span>Shift + Q + R</span> → Capture a screenshot for your current DSA question.</p>
+      <p><span>Shift + Q + F</span> → Finish capturing & send all screenshots to AI + backend.</p>
     </div>
-    <script src="./renderer.js"></script>
+
+    <div id="preview-area">
+      <!-- Thumbnails of screenshots will appear here dynamically -->
+    </div>
+
+    <div id="caption-box">Ready to capture your first screenshot...</div>
+
+    <footer>
+      Built with ❤️ using Electron + Gemini AI
+    </footer>
+  </div>
+
+  <script>
+    const captionBox = document.getElementById('caption-box');
+    const previewArea = document.getElementById('preview-area');
+
+    window.electronAPI.onScreenshotAndCaption(({ image, caption }) => {
+      // Update UI dynamically
+      captionBox.innerText = caption || 'Processing...';
+
+      if (image) {
+        const img = document.createElement('img');
+        img.src = image;
+        img.classList.add('screenshot-thumb');
+        previewArea.appendChild(img);
+      }
+    });
+  </script>
 </body>
 </html>

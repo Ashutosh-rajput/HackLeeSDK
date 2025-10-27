@@ -1,22 +1,24 @@
 // [LOG 1] Starting main.js execution...
 console.log('[LOG 1] Starting main.js execution...');
 
-require('dotenv').config(); // ✅ Load .env variables at the very top
+require('dotenv').config(); // ✅ Load environment variables
 
 const { app, BrowserWindow, globalShortcut, desktopCapturer } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
-// ✅ Ensure fetch works in Electron’s main process (important!)
+// ✅ Ensure fetch works in Electron’s main process
 global.fetch = (...args) =>
   import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 const { GoogleGenAI } = require('@google/genai');
 
 let ai;
+let capturedScreens = []; // store screenshots
+let lastGeminiResponse = ''; // store latest Gemini response text
 
 /**
- * Create the main application window and initialize the AI client.
+ * Create main app window and initialize Gemini
  */
 function createWindow() {
   console.log('[LOG 2] createWindow() called.');
@@ -50,21 +52,26 @@ function createWindow() {
 }
 
 /**
- * When Electron is ready, create the window and register global shortcuts.
+ * Register keyboard shortcuts
  */
 app.whenReady().then(() => {
   console.log('[LOG 5] App is ready.');
-
   createWindow();
 
-  // ✅ Register Shift + Q + R for screenshot and caption
-  const ret = globalShortcut.register('Shift+Q+R', () => {
-    console.log('--- Shortcut Pressed: Starting screenshot + caption process ---');
-    takeScreenshotAndCaption();
+  // ✅ Capture screenshot (Shift + Q + R)
+  const captureShortcut = globalShortcut.register('Shift+Q+R', async () => {
+    console.log('--- Shortcut Pressed: Capturing screenshot ---');
+    await captureAndProcessScreenshot();
   });
 
-  if (!ret) {
-    console.error('[ERROR] Failed to register global shortcut. Possibly already in use.');
+  // ✅ Finish capturing (Shift + Q + F)
+  const finishShortcut = globalShortcut.register('Shift+Q+F', async () => {
+    console.log('--- Shortcut Pressed: Finishing question ---');
+    await sendFinalResultToBackend();
+  });
+
+  if (!captureShortcut || !finishShortcut) {
+    console.error('[ERROR] Failed to register one or more shortcuts.');
   }
 
   app.on('activate', () => {
@@ -72,34 +79,19 @@ app.whenReady().then(() => {
   });
 });
 
-/**
- * Unregister all shortcuts when quitting.
- */
-app.on('will-quit', () => {
-  globalShortcut.unregisterAll();
-});
-
-/**
- * Quit when all windows are closed (except on macOS).
- */
+app.on('will-quit', () => globalShortcut.unregisterAll());
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
 
 /**
- * Take a screenshot, send it to Gemini, and show caption in the app.
+ * Capture one screenshot and send to Gemini with previous response context
  */
-async function takeScreenshotAndCaption() {
+async function captureAndProcessScreenshot() {
   const mainWindow = BrowserWindow.getAllWindows()[0];
-  if (!mainWindow) {
-    console.error('[ERROR] No main window found.');
-    return;
-  }
+  if (!mainWindow) return console.error('[ERROR] No main window found.');
 
-  if (!ai) {
-    console.error('[ERROR] GoogleGenAI client not initialized.');
-    return;
-  }
+  if (!ai) return console.error('[ERROR] GoogleGenAI client not initialized.');
 
   try {
     const sources = await desktopCapturer.getSources({
@@ -107,16 +99,16 @@ async function takeScreenshotAndCaption() {
       thumbnailSize: { width: 1920, height: 1080 }
     });
 
-    if (!sources.length) {
-      throw new Error('No screens detected for capture.');
-    }
+    if (!sources.length) throw new Error('No screens detected.');
 
-    const screenshotPath = path.join(app.getPath('temp'), 'screenshot.png');
+    const screenshotPath = path.join(app.getPath('temp'), `screenshot_${Date.now()}.png`);
     fs.writeFileSync(screenshotPath, sources[0].thumbnail.toPNG());
-    console.log('[LOG 6] Screenshot saved at:', screenshotPath);
 
     const base64ImageFile = fs.readFileSync(screenshotPath, { encoding: 'base64' });
+    capturedScreens.push(base64ImageFile);
+    console.log(`[LOG] Screenshot ${capturedScreens.length} captured.`);
 
+    // Build Gemini request
     const contents = [
       {
         inlineData: {
@@ -124,29 +116,80 @@ async function takeScreenshotAndCaption() {
           data: base64ImageFile
         }
       },
-      { text: 'Caption this image.' }
+      {
+        text:
+          capturedScreens.length === 1
+            ? "Extract the DSA question, code boilerplate, examples, and input/output details from this image."
+            : `Update the previous extracted information with any new details from this new screenshot.
+               Prior extracted content:\n${lastGeminiResponse}`
+      }
     ];
 
-    console.log('[LOG 7] Sending screenshot to Gemini for caption...');
+    console.log('[LOG] Sending screenshot to Gemini...');
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
-      contents: contents
+      contents
     });
 
-    const caption = response.text || '(No caption received)';
-    console.log('[LOG 8] Caption received:', caption);
+    lastGeminiResponse = response.text || lastGeminiResponse; // update context
+    console.log(`[LOG] Gemini response length: ${lastGeminiResponse.length}`);
 
-    const dataUrl = `data:image/png;base64,${base64ImageFile}`;
+    // Send update to frontend
     mainWindow.webContents.send('screenshot-and-caption', {
-      image: dataUrl,
-      caption: caption
+      image: `data:image/png;base64,${base64ImageFile}`,
+      caption: `Processed Screenshot ${capturedScreens.length}\n\n${truncateText(
+        lastGeminiResponse,
+        400
+      )}`
     });
-
   } catch (error) {
-    console.error('[ERROR] During screenshot or caption generation:', error);
-    mainWindow.webContents.send('screenshot-and-caption', {
-      image: '',
-      caption: `Error: ${error.message}`
-    });
+    console.error('[ERROR] During screenshot or Gemini processing:', error);
   }
+}
+
+/**
+ * Send final Gemini response to backend and reset
+ */
+async function sendFinalResultToBackend() {
+  if (!lastGeminiResponse) {
+    console.error('[ERROR] No Gemini response to send.');
+    return;
+  }
+
+  try {
+    const backendBase = process.env.BASE_URL || 'http://localhost:8000';
+    const payload = { problem: lastGeminiResponse.trim() };
+
+    console.log('[LOG] Sending final Gemini response to backend...');
+    const res = await fetch(`${backendBase}/init_task`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    console.log('[LOG] Backend response:', res.status);
+
+    // Notify frontend
+    const mainWindow = BrowserWindow.getAllWindows()[0];
+    if (mainWindow) {
+      mainWindow.webContents.send('screenshot-and-caption', {
+        image: '',
+        caption: `✅ Sent final structured question to backend (${res.status})`
+      });
+    }
+
+    // Reset state for next question
+    capturedScreens = [];
+    lastGeminiResponse = '';
+  } catch (error) {
+    console.error('[ERROR] Sending to backend:', error);
+  }
+}
+
+/**
+ * Helper to shorten long Gemini text for UI display
+ */
+function truncateText(text, maxLength) {
+  if (!text) return '';
+  return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
 }
