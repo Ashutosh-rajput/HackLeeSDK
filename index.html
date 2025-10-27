@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Screenshot Captioner</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f0f0f0; color: #333; }
+        #container { padding: 20px; }
+        #screenshot { max-width: 100%; border: 1px solid #ccc; }
+        #caption { margin-top: 10px; font-size: 1.2em; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>Press Shift+Q+R to take a screenshot and get a caption</h1>
+        <img id="screenshot" src="" alt="Screenshot will appear here">
+        <p id="caption"></p>
+    </div>
+    <script src="./renderer.js"></script>
+</body>
+</html>
