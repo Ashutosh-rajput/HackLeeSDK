@@ -1,0 +1,529 @@
+<meta name="referrer" content="no-referrer">
+</head>
+<script>
+window.onload = function() {
+    // modal style
+var css = '\
+  .ns-template-wrap { \
+     z-index: 2; \
+     font-size: 12px; \
+     background: #ffffff; \
+     line-height: 16px; \
+     color: #646464; \
+     border-top: 8px solid transparent; \
+     padding: 24px 32px 32px; \
+     font-family: Lato, sans-serif; \
+  } \
+  .ns-template-inner-wrap { \
+     width: 600px; \
+     margin: 0 auto; \
+  } \
+  .ns-template-wrap * { \
+     box-sizing: border-box; \
+  } \
+  .ns-template-wrap h1 { \
+     margin-top: 0; \
+     color: #000000; \
+     font-size: 20px; \
+     line-height: 24px; \
+     font-weight: normal; \
+     margin-bottom: 16px; \
+  } \
+  .ns-template-wrap h2 { \
+     margin-top: 0; \
+     color: #000000; \
+     font-size: 14px; \
+     line-height: 20px; \
+     font-weight: normal; \
+     margin-bottom: 16px; \
+  } \
+  .ns-template-wrap p { \
+     color: #646464; \
+     font-size: 12px; \
+     line-height: 16px; \
+     margin-bottom: 24px; \
+  } \
+  .ns-template-wrap p.message-max-height { \
+     max-height: 40vh; \
+     overflow: auto; \
+     word-wrap: break-word; \
+     margin-bottom: 20px; \
+  } \
+  .ns-template-wrap fieldset { \
+     margin: 0 0 12px 0; \
+     padding: 0; \
+     border: 0; \
+  } \
+  .ns-template-wrap fieldset label{ \
+     margin: 0 0 8px 0; \
+     padding: 0; \
+     border: 0; \
+     font-size: 14px; \
+     line-height: 20px; \
+     color: #000000; \
+  } \
+  .ns-template-wrap fieldset label::after{ \
+     content: ""; \
+     display: table; \
+     width: 100%; \
+     clear: both; \
+  } \
+  .ns-template-wrap fieldset label:last-of-type{ \
+     margin-bottom: 0; \
+  } \
+  .ns-template-wrap .custom-logo { \
+     margin-bottom: 24px; \
+  } \
+  .ns-template-wrap .custom-logo.small { \
+     max-height: 48px; \
+  } \
+  .ns-template-wrap .custom-logo.medium { \
+     max-height: 64px; \
+  } \
+  .ns-template-wrap .custom-logo.large { \
+     max-height: 128px; \
+  } \
+  .ns-template-wrap textarea { \
+     font-family: inherit; \
+     padding: 8px 12px; \
+     height: 80px; \
+     width: 100% !important; \
+     resize: none; \
+     border: 1px solid #E1E1E1; \
+     border-radius: 4px; \
+     background-color: #FFFFFF; \
+     color: #434343; \
+     font-size: 13px; \
+     line-height: 16px; \
+  } \
+  .ns-template-wrap button[disabled] { \
+     background: #EEEEEE; \
+     border-color: #E3E3E3; \
+     color: #ccc; \
+  } \
+  .ns-template-wrap button { \
+     height: auto; \
+     min-width: 88px; \
+     max-width: 160px; \
+     overflow: hidden; \
+     text-overflow: ellipsis; \
+     padding: 8px 16px; \
+     font-size: 12px; \
+     font-weight: bold; \
+     line-height: 16px; \
+     text-align: center; \
+     text-transform: uppercase; \
+  } \
+  .ns-template-wrap button.ns-btn-primary { \
+     border: 1px solid #1BB7DF; \
+     color: #FFFFFF; \
+     border-radius: 4px; \
+     background-color: #1BB7DF; \
+  } \
+  .ns-template-wrap button.ns-btn-cancel { \
+     border: 1px solid #1BB7DF; \
+     border-radius: 4px; \
+     background-color: #FFFFFF; \
+     color: #12A3D4; \
+     margin-right: 8px; \
+  }\
+  .ns-user-justify-modal-wrap { \
+      font-size: 14px; \
+      color: #333333; \
+      text-align: center; \
+  } \
+  .ns-user-justify-modal-backdrop { \
+      position: fixed; \
+      z-index: 1; \
+      top: 0; \
+      left: 0; \
+      height: 100%; \
+      width: 100%; \
+      opacity: .6; \
+      background: #000000; \
+  } \
+  .ns-user-justify-modal-wrap .modal-header { \
+      min-height: 40px; \
+      height: auto; \
+      padding: 0; \
+      background: #FFFFFF; \
+      border-bottom: 0; \
+  } \
+  .ns-user-justify-modal-wrap .modal-header .modal-header { \
+      padding: 0 0 24px 0; \
+  } \
+  .ns-user-justify-modal-wrap textarea { \
+      font-size: inherit; \
+      font-family: inherit; \
+  } \
+  .ns-user-justify-modal-wrap * { \
+      box-sizing: border-box; \
+  } \
+  .ns-user-justify-modal { \
+      position: relative; \
+      display: inline-block; \
+      z-index: 2; \
+      padding: 72px 32px 0; \
+      width: 100%; \
+      max-width: 480px; \
+      text-align: left; \
+      border-radius: 2px; \
+      background-color: #FFFFFF; \
+      color: #242424; \
+      font-family:Lato, Arial, sans-serif; \
+      font-size: 14px; \
+      line-height: 20px; \
+  } \
+  .ns-user-justify-modal h1 { \
+      margin-top: 0; \
+      color: #000100; \
+      font-size: 20px; \
+      line-height: 24px; \
+      font-family:Lato, Arial, sans-serif; \
+  } \
+  .ns-user-justify-modal h2 { \
+      margin-top: 0; \
+      color: #000100; \
+      font-size: 18px; \
+      line-height: 24px; \
+      font-family:Lato, Arial, sans-serif; \
+  } \
+  .ns-user-justify-modal h3 { \
+      margin-top: 0; \
+      color: #000100; \
+      font-size: 16px; \
+      line-height: 24px; \
+      font-family:Lato, Arial, sans-serif; \
+  } \
+  .ns-user-justify-modal p { \
+      margin: 24px 0; \
+      color: #434343; \
+      font-size: 12px; \
+      line-height: 15px; \
+      max-height: 150px; \
+      overflow-y: auto; \
+  } \
+  .ns-user-justify-modal label { \
+      display: block; \
+      margin-right: .5em; \
+  } \
+  .ns-user-justify-modal fieldset { \
+      margin: 1em 0 0; \
+      padding: 0; \
+      border: 0; \
+  } \
+  .ns-user-justify-modal .custom-logo { \
+      position: absolute; \
+      top: 24px; \
+      left: 32px; \
+      max-height: 60px; \
+      max-width: 128px; \
+  } \
+  #ns-justify-description-box { \
+      padding: .5em; \
+      height: 7.5em; \
+      width: 100% !important; \
+      resize: none; \
+      margin-bottom: 0; \
+      border: 1px solid #E1E1E1; \
+      border-radius: 4px; \
+      background-color: #FFFFFF; \
+      color: #9B9B9B; \
+      font-size: 13px; \
+      line-height: 16px; \
+  } \
+  .ns-user-justify-modal-wrap button[disabled] { \
+      background: #EEEEEE; \
+      border-color: #E3E3E3; \
+      color: #ccc; \
+  } \
+  .ns-btn-group { \
+      margin-top: 40px; \
+      padding: 16px 0; \
+      text-align: right; \
+      position: relative; \
+  } \
+  .ns-btn-group:after { \
+      content: ""; \
+      background: #EEEEEE; \
+      height: 1px; \
+      width: calc(100% + 64px); \
+      position: absolute; \
+      top: 0; \
+      left: -32px; \
+  } \
+  .ns-btn-group button { \
+      height: auto; \
+      min-width: 88px; \
+      max-width: 160px; \
+      overflow: hidden; \
+      text-overflow: ellipsis; \
+      padding: 8px 16px; \
+      font-size: 12px; \
+      font-weight: bold; \
+      line-height: 16px; \
+      text-align: center; \
+      text-transform: uppercase; \
+  } \
+  .ns-btn-cancel { \
+      border: 1px solid #1BB7DF; \
+      border-radius: 4px; \
+      background-color: #FFFFFF; \
+      color: #1BB7DF; \
+      float: left; \
+  } \
+  .ns-btn-primary { \
+      color: #FFFFFF; \
+      border-radius: 4px; \
+      background-color: #1BB7DF; \
+      border: 1px solid #1BB7DF; \
+  } \
+  .ns-btn-group.ns-no-border { \
+      text-align: left; \
+      padding: 0; \
+      margin-top: 32px; \
+  } \
+  .ns-btn-group.ns-no-border:after { \
+      background: transparent; \
+  } \
+  .ns-btn-group.ns-no-border .ns-btn-cancel { \
+      margin-right: 8px; \
+  } \
+  .ns-user-justify-modal h4 { \
+      margin-top:0; \
+      margin-bottom:0; \
+      color: #000100; \
+      font-size: 20px; \
+      line-height: 24px; \
+      font-family:Lato, Arial, sans-serif; \
+      font-weight:normal; \
+  } \
+  .ns-user-justify-modal h5 { \
+      margin-top: 0; \
+      margin-bottom: 0; \
+      color: #434343; \
+      font-size: 12px; \
+      line-height: 16px; \
+      font-family:Lato, Arial, sans-serif; \
+      font-weight: normal; \
+  } \
+  .ns-form-input { \
+      width: 280px; \
+      border: 1px solid #E1E1E1; \
+      border-radius: 4px; \
+      background-color: #FFFFFF; \
+      color: #9B9B9B; \
+      font-family:Lato, Arial, sans-serif; \
+      font-size: 13px; \
+      line-height: 16px; \
+      padding:8px 12px; \
+      margin-top: 16px; \
+      margin-bottom:0; \
+  } \
+  .ns-padding-none { \
+      padding: 0 !important; \
+  } \
+  .ns-margin-none { \
+      margin: 0 !important; \
+  }';
+
+var notify_css = document.createElement('style');
+notify_css.innerHTML = css;
+document.getElementsByTagName("head")[0].appendChild(notify_css);
+
+function renderMessage(params) {
+    /*
+    // params comes from server
+    // The top format is for rendering the justification html
+    // and the bottom format is for rendering the block html.
+    @params = {
+    msg: (string),
+    justify: (htmlString)
+    } or
+    @params = {
+    rawmsg: (htmlString)
+    }
+     */
+    var notify_modal_container = document.createElement('div');
+    if (document.body) {
+        document.body.appendChild(notify_modal_container);
+    }
+    // Display justification pages
+    doc = window.document;
+
+    notify_css = doc.createElement('style');
+    notify_css.innerHTML = css;
+    doc.getElementsByTagName("head")[0].appendChild(notify_css);
+
+    doc.body.innerHTML = params.justify;
+    doc.querySelector('.msg').innerHTML = params.msg;
+
+    formData = {};
+    var justifyForm = doc.querySelector('.ns-template-inner-wrap form');
+    var descriptionField = doc.querySelector('#ns-justify-description');
+    var descriptionFieldBox = doc.querySelector('#ns-justify-description-box');
+    var justifySubmitBtns = justifyForm.querySelectorAll('.ns-submit');
+    var justifyRadio = justifyForm.querySelector('#justify-usage-radio');
+    var falsePositiveRadio = justifyForm.querySelector('#false-positive-radio');
+
+    var justification_req = 1;
+    _ns_justify_message_ = 1;
+    _ns_url_ = justifyForm.getAttribute('action');
+
+    var justifyFields = justifyForm.querySelectorAll('[name]');
+    for (var i=0; i<justifyFields.length; i++) {
+        var field = justifyFields[i];
+        var key = field.getAttribute('name');
+        if(key == 'msuid') {
+            _ns_msuid_ = field.value;
+            break;
+        }
+    }
+
+    function disableSubmitBtns() {
+        if (justifySubmitBtns.length == 2) {
+            justifySubmitBtns[1].setAttribute('disabled', 'disabled');
+        } else if (justifySubmitBtns.length == 1) {
+            justifySubmitBtns[0].setAttribute('disabled', 'disabled');
+        }
+    }
+
+    function enableSubmitBtns() {
+        if (justifySubmitBtns.length == 2) {
+            justifySubmitBtns[1].removeAttribute('disabled');
+        } else if (justifySubmitBtns.length == 1) {
+            justifySubmitBtns[0].removeAttribute('disabled');
+        }
+    }
+
+    function validateForm() {
+        if(params.force_justify == "false")
+            return;
+
+        if (!descriptionFieldBox || !justifySubmitBtns) {
+            return;
+        }
+        if (justification_req == 1 && !descriptionFieldBox.value.length) {
+            disableSubmitBtns();
+        } else {
+            if (justification_req == 1 &&
+                descriptionFieldBox.value.length &&
+                !descriptionFieldBox.value.match(/([^\u0000-\u007F]|\w)+/)) {
+                disableSubmitBtns();
+            } else {
+                enableSubmitBtns();
+            }
+        }
+    }
+
+    function submitModal() {
+        var justifyFields = justifyForm.querySelectorAll('[name]');
+        var url = justifyForm.getAttribute('action');
+
+        var cancel_button = 0;
+        if(this.value == 'cancel')
+            cancel_button = 1;
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", url, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState == 2) {
+                if(cancel_button)
+                    window.location = "https://resources.deloitte.com/sites/MyTechnology/SitePages/Software_and_Apps/Software/Sidekick.aspx";
+                else
+                    document.location.reload();
+            }
+        }
+
+        formData["justification_type"] = "justification";
+        formData["_uj_category_id"] = "600";
+        formData["web_category"] = "600";
+        formData["policy"] = "US - CASB Deny - Generative AI Redirect Sidekick";
+        formData["_uj_dest_ip"] = "142.250.70.74";
+        formData["uj_response_file_name"] = "";
+        formData["app"] = "Google Bard";
+        formData["appsessiondata"] = "eyJhcHAiOiJHb29nbGUgQmFyZCIsImNvbnRlbnRWZXJzaW9uIjoxNzYxNTY0NjQ4fQ==";
+        formData["from_user"] = "";
+        formData["instance_id"] = "";
+        formData["suppress_interval"] = "";
+        formData["suppress_data"] = "";
+        formData["no_alert"] = "false";
+        for (var i=0; i<justifyFields.length; i++) {
+            var field = justifyFields[i];
+            var key = field.getAttribute('name');
+            var value = field.value;
+            if ((key == "justification_type") && (!field.checked)) {
+                continue;
+            }
+            formData[key] = value;
+        }
+
+        if (this.value) {
+            formData.submitId = this.value;
+        } else {
+            formData.submitId = 'cancel';
+        }
+        xhr.send(JSON.stringify(formData));
+    }
+
+    validateForm();
+    // add events
+    if (descriptionField) {
+        descriptionField.addEventListener('input', validateForm);
+    }
+
+    if(justifyRadio) {
+        justifyRadio.addEventListener('click', function() {
+            descriptionField.style.display = 'block';
+            justification_req = 1;
+            validateForm();
+        });
+    }
+
+    if(falsePositiveRadio) {
+        falsePositiveRadio.addEventListener('click', function() {
+            descriptionField.style.display = 'none';
+            descriptionField.value = '';
+            justification_req = 0;
+            validateForm();
+        });
+    }
+
+    for (var i=0; i<justifySubmitBtns.length; i++) {
+        justifySubmitBtns[i].addEventListener('click', submitModal);
+    }
+
+    if (doc.querySelector('#ns-justify-description-box')) {
+        var keydownfunc = function(e) {
+            e.stopPropagation();
+        }
+        doc.querySelector('#ns-justify-description-box').addEventListener("keydown", keydownfunc, false);
+
+        var keypressfunc = function(e) {
+            e.stopPropagation();
+        }
+        doc.querySelector('#ns-justify-description-box').addEventListener("keypress", keypressfunc, false);
+    }
+}
+
+renderMessage({
+    "msg" : "Deloitte ΓÇô GenAI Redirect",
+    "expire" : 600000,
+    "justify" : "<div class='ns-template-outer-wrap'><div class='ns-template-wrap'><div class='ns-template-inner-wrap'><img class='custom-logo medium' ><h1 id='preview-title-box' class='msg'>Deloitte ΓÇô GenAI Redirect</h1><h2 id='previe
+w-subtitle-box'></h2><p id='preview-information-box' class='message-max-height'>Use of this publicly available Generative AI tool and/or entering confid
+ential information or any other data into this tool is prohibited.<br/><br/>Click below to be redirected to Sidekick, DeloitteΓÇÖs trusted and secure in
+ternal Generative AI chat tool, built on Azure OpenAI GPT-4.<br/> <br/><a href=\"https://sidekick.deloitte.com\">Non-GPS Sidekick</a> or <a href=\"https
+://sidekick.gps.deloitte.com/\">GPS Sidekick</a><br/><br/>Sidekick is designed to be your digital thought partner for brainstorming, researching, and id
+eating, supplemented with a starter kit of Deloitte-specific information to help you get more tailored answers. <br/><br/><br/>Exception Details: <br/>
+   Restricted URL: generativelanguage.googleapis.com/v1beta/openai/chat/completions <br/>    Restricted URL Category: Generative AI <br/>Additional Deta
+ils:<br/>Application Accessed: Google Bard <br/>Activity Performed: Browse <br/>Restricted Policy: US - CASB Deny - Generative AI Redirect Sidekick <br/
+>Authenticated User: ashrajput@deloitte.com</p><form action=/7b991f136b1a341468690025045d0f1028253a3cbe67affae31800930ac698b0/s><input type='hidden' nam
+e='msuid' value='1042350527386403648' /><input type='hidden' name='referer' value='https://resources.deloitte.com/sites/MyTechnology/SitePages/Software_
+and_Apps/Software/Sidekick.aspx'/><input type='hidden' name='policy_name' value='US - CASB Deny - Generative AI Redirect Sidekick'/><input type='hidden'
+ name='app' value='Google Bard'/><input type='hidden' name='activity' value='Browse'/><input type='hidden' name='filename' value=''/><p id='preview-foot
+er-box'></p><div class='ns-btn-group'><button class='ns-btn-cancel ns-submit' type='button' value='cancel' id='ns-justify-cancel'>Sidekick Info</button></div></form></div></div></div>",
+    "force_justify" : "false"
+});
+}
+</script>

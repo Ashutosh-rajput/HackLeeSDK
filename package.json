@@ -3,16 +3,52 @@
   "version": "1.0.0",
   "description": "An app to take a screenshot and generate a caption.",
   "main": "main.js",
+  "author": "Your Name Here",
   "scripts": {
-    "start": "electron ."
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
   },
   "keywords": [],
-  "author": "",
   "license": "ISC",
   "dependencies": {
-    "@google/genai": "^1.23.0",
     "dotenv": "^17.2.3",
-    "electron": "^28.0.0",
-    "node-fetch": "^3.3.2"
+    "electron-squirrel-startup": "^1.0.1",
+    "node-fetch": "^3.3.2",
+    "openai": "^6.7.0"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^7.10.2",
+    "@electron-forge/maker-deb": "^7.10.2",
+    "@electron-forge/maker-rpm": "^7.10.2",
+    "@electron-forge/maker-squirrel": "^7.10.2",
+    "@electron-forge/maker-zip": "^7.10.2",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.10.2",
+    "@electron-forge/plugin-fuses": "^7.10.2",
+    "@electron/fuses": "^1.8.0",
+    "electron": "^28.3.3"
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "authors": "Your Name or Company",
+            "description": "An AI-powered screenshot captioning tool."
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip"
+        },
+        {
+          "name": "@electron-forge/maker-deb"
+        },
+        {
+          "name": "@electron-forge/maker-rpm"
+        }
+      ]
+    }
   }
 }
